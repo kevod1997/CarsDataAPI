@@ -2,6 +2,7 @@ import base64
 from datetime import timedelta
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 # from fastapi.security import OAuth2PasswordRequestForm
@@ -35,6 +36,36 @@ app = FastAPI(
     version="1.0.0",  # Optional version
     openapi_url="/openapi.json",
 )
+
+
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Añadir un endpoint de health check
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
+# Verificar la configuración al inicio
+@app.on_event("startup")
+async def startup_event():
+    print("Starting up...")
+    print(f"PORT: {os.getenv('PORT', '8000')}")
+    # Verificar otras variables de entorno críticas
+    required_vars = ['GOOGLE_CREDENTIALS', 'SPREADSHEET_ID']
+    for var in required_vars:
+        value = os.getenv(var)
+        if not value:
+            print(f"Warning: {var} not set!")
+        else:
+            print(f"{var} is configured")
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 # Configurar directorio de recursos estáticos
