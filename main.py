@@ -1,4 +1,6 @@
 import base64
+import os
+
 from datetime import timedelta
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
